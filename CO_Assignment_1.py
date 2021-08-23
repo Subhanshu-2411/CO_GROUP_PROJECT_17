@@ -101,20 +101,27 @@ ans = []
 
 registerStorage = [0, 0, 0, 0, 0, 0, 0, 0]
 
-#complete_input = sys.stdin.readlines()
+##################################################Above this nothing was changed
+'''
+The register only supports whole numbers so all operations leading to negative will be set to 0 and overflow will be actiavted.
 
-while True:
-    line = input()
-    if (line == "hlt"):
-        lst.append(['hlt'])
+'''
+sim = []
+programCounter = -1
+while(True):
+    inst = input();
+    if(inst=="hlt"):
         break
-    elif (line == ""):
+    elif(inst==" "):
         continue
     else:
-        lst.append(line.split(" "))
+        lst.append(inst.split(" "))
 
 
 for i in range(len(lst)):
+
+
+
     if lst[i][0] == 'mov':
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
@@ -125,10 +132,24 @@ for i in range(len(lst)):
             ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
         else:
             p = 'moveimmediate'
+            if lst[i][2][1] < 0 or lst[i][2][1] > 255:
+                print("Illegal Immediate Value")
+                break
             if lst[i][2][0] == '$':
                 lst[i][2] = lst[i][2][1:]
                 registerStorage[int(lst[i][1][1])] = int(lst[i][2])
-            ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
+                ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
+##########################################
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+##########################################
+
     elif lst[i][0] == 'add':
         if(len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
@@ -140,6 +161,24 @@ for i in range(len(lst)):
             break
         p = 'addition'
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
+##########################################
+        if(registerStorage[binToDec(int(registerValue(lst[i][1])))]  > 2**16-1):
+            #This will set the flag since because of the addition the value stored in the destination
+            # register is now greater than the permissible value of 2^16-1
+            registerStorage[7] = 8
+            registerStorage[binToDec(int(registerValue(lst[i][1])))] = 2**16-1
+        else:
+            registerStorage[7] = 0
+
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+#############################################
+
     elif lst[i][0] == 'sub':
         if (len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
@@ -151,6 +190,24 @@ for i in range(len(lst)):
             break
         p = 'subtraction'
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
+##########################################
+        if (registerStorage[binToDec(int(registerValue(lst[i][1])))] < 0):
+            # This will set the flag since because of the subtraction the value stored in the destination
+            # register is now negative
+            registerStorage[7] = 8
+            registerStorage[binToDec(int(registerValue(lst[i][1])))] = 0
+        else:
+            registerStorage[7] = 0
+
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+##########################################
+
     elif lst[i][0] == 'mul':
         if (len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
@@ -162,8 +219,26 @@ for i in range(len(lst)):
             break
         p = 'multiply'
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
+##########################################
+        if (registerStorage[binToDec(int(registerValue(lst[i][1])))] > 2**16-1):
+            # This will set the flag since because of the multiplication the value stored in the destination
+            # register is now greater than the permissible value of 2^16-1
+            registerStorage[7] = 8
+            registerStorage[binToDec(int(registerValue(lst[i][1])))] = 2**16-1
+        else:
+            registerStorage[7] = 0
+
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+##########################################
+
     elif lst[i][0] == 'div':
-        # Genral Syntax Error for any no. != 0
+        # General Syntax Error for any no. != 0
         # second register should not be zero, R0 and R1 should not be initialised, quotient in R0 and remainder in R1
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
@@ -178,22 +253,61 @@ for i in range(len(lst)):
         registerStorage[1] = binToDec(int(registerValue(lst[i][1]))) % binToDec(int(registerValue(lst[i][2])))
         p = 'divide'
         ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
+##########################################
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+##########################################
+
     elif lst[i][0] == 'rs':
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
             break
         p = 'rightshift'
         lst[i][2] = lst[i][2][1:]
+        if lst[i][2]<0 or lst[i][2]>255:
+            print("Illegal Immediate Value")
+            break
         registerStorage[binToDec(int(registerValue(lst[i][1])))] //= int(lst[i][2])
         ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
+##########################################
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+##########################################
+
     elif lst[i][0] == 'ls':
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
             break
         p = 'leftshift'
         lst[i][2] = lst[i][2][1:]
+        if lst[i][2] <0 or lst[i][2]>255:
+            print("Illegal Immediate Value")
+            break
         registerStorage[binToDec(int(registerValue(lst[i][1])))] *= int(lst[i][2])
         ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
+##########################################
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+##########################################
+
     elif lst[i][0] == 'xor':
         if (len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
@@ -201,6 +315,17 @@ for i in range(len(lst)):
         registerStorage[int(binToDec(registerValue(lst[i][1])))] = registerStorage[int(binToDec(registerValue(lst[i][2])))] ^ registerStorage[int(binToDec(registerValue(lst[i][3])))]
         p = 'exclusiveor'
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
+##########################################
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+##########################################
+
     elif lst[i][0] == 'or':
         if (len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
@@ -208,6 +333,17 @@ for i in range(len(lst)):
         registerStorage[int(binToDec(registerValue(lst[i][1])))] = registerStorage[int(binToDec(registerValue(lst[i][2])))] | registerStorage[int(binToDec(registerValue(lst[i][3])))]
         p = 'or'
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
+##########################################
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+##########################################
+
     elif lst[i][0] == 'and':
         if (len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
@@ -215,6 +351,17 @@ for i in range(len(lst)):
         registerStorage[int(binToDec(registerValue(lst[i][1])))] = registerStorage[int(binToDec(registerValue(lst[i][2])))] & registerStorage[int(binToDec(registerValue(lst[i][3])))]
         p = 'and'
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
+##########################################
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+##########################################
+
     elif lst[i][0] == 'not':
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
@@ -222,16 +369,40 @@ for i in range(len(lst)):
         p = 'invert'
         registerStorage[int(binToDec(registerValue(lst[i][1])))] = NOT(str(registerStorage[int(binToDec(registerValue(lst[i][2])))]))
         ans.apoend(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
+##########################################
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+##########################################
+
     elif lst[i][0] == 'cmp':
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
             break
-        if registerStorage[binToDec(int(registerValue(lst[i][1])))] > registerStorage[binToDec(int(registerValue(lst[i][1])))]:
-            flag.append("0000000000000010")
-        elif registerStorage[binToDec(int(registerValue(lst[i][1])))] < registerStorage[binToDec(int(registerValue(lst[i][1])))]:
-            flag.append("0000000000000100")
-        elif registerStorage[binToDec(int(registerValue(lst[i][1])))] == registerStorage[binToDec(int(registerValue(lst[i][1])))]:
-            flag.append("0000000000000001")
+
+##########################################
+        if registerStorage[binToDec(int(registerValue(lst[i][1])))] > registerStorage[binToDec(int(registerValue(lst[i][2])))]:
+            registerStorage[7] = 2
+        elif registerStorage[binToDec(int(registerValue(lst[i][1])))] < registerStorage[binToDec(int(registerValue(lst[i][2])))]:
+            registerStorage[7] = 4
+        elif registerStorage[binToDec(int(registerValue(lst[i][1])))] == registerStorage[binToDec(int(registerValue(lst[i][2])))]:
+            registerStorage[7] = 1
+
+        aux = []
+        programCounter = programCounter+1
+        toAdd = bin(programCounter,8)
+        aux.append(str(toAdd))
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(aux[0]+ " " + aux[1] + " " + aux[2] + " " + aux[3] + " " +aux[4] + " " + aux[5] + " "+ aux[6] + " " + aux[7] + " " + aux[8] )
+
+ ##########################################
+
     elif lst[i][0] == 'jmp':
         if (len(lst[i]) != 2):
             print("Wrong syntax used for instructions")
@@ -239,6 +410,20 @@ for i in range(len(lst)):
         p = 'unconditionaljump'
         i = binToDec(int(lst[i][1]))
         ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
+
+##########################################
+        aux = []
+        programCounter = programCounter + 1
+        toAdd = bin(programCounter, 8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(
+            aux[0] + " " + aux[1] + " " + aux[2] + " " + aux[3] + " " + aux[4] + " " + aux[5] + " " + aux[6] + " " +
+            aux[7] + " " + aux[8])
+##########################################
+
     elif lst[i][0] == 'jlt':
         if (len(lst[i]) != 2):
             print("Wrong syntax used for instructions")
@@ -248,6 +433,20 @@ for i in range(len(lst)):
             if j == "0000000000000100":
                 i = binToDec(int(lst[i][1]))
         ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
+
+##########################################
+        aux = []
+        programCounter = programCounter + 1
+        toAdd = bin(programCounter, 8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(
+            aux[0] + " " + aux[1] + " " + aux[2] + " " + aux[3] + " " + aux[4] + " " + aux[5] + " " + aux[6] + " " +
+            aux[7] + " " + aux[8])
+##########################################
+
     elif lst[i][0] == 'jgt':
         if (len(lst[i]) != 2):
             print("Wrong syntax used for instructions")
@@ -257,6 +456,20 @@ for i in range(len(lst)):
             if j == "0000000000000010":
                 i = binToDec(int(lst[i][1]))
         ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
+
+##########################################
+        aux = []
+        programCounter = programCounter + 1
+        toAdd = bin(programCounter, 8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(
+            aux[0] + " " + aux[1] + " " + aux[2] + " " + aux[3] + " " + aux[4] + " " + aux[5] + " " + aux[6] + " " +
+            aux[7] + " " + aux[8])
+##########################################
+
     elif lst[i][0] == 'je':
         if (len(lst[i]) != 2):
             print("Wrong syntax used for instructions")
@@ -266,6 +479,63 @@ for i in range(len(lst)):
             if j == "0000000000000001":
                 i = binToDec(int(lst[i][1]))
         ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
+
+##########################################
+        aux = []
+        programCounter = programCounter + 1
+        toAdd = bin(programCounter, 8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(
+            aux[0] + " " + aux[1] + " " + aux[2] + " " + aux[3] + " " + aux[4] + " " + aux[5] + " " + aux[6] + " " +
+            aux[7] + " " + aux[8])
+##########################################
+
+    elif lst[i][0] == 'st':
+        if (len(lst[i]) != 3):
+            print("General Syntax Error")
+            break
+        p = 'store'
+        var[lst[i][2]] = registerStorage[binToDec(int(registerValue(lst[i][1])))]
+        ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(i + 1, 8))
+
+##########################################
+        aux = []
+        programCounter = programCounter + 1
+        toAdd = bin(programCounter, 8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(
+            aux[0] + " " + aux[1] + " " + aux[2] + " " + aux[3] + " " + aux[4] + " " + aux[5] + " " + aux[6] + " " +
+            aux[7] + " " + aux[8])
+##########################################
+
+
+    elif lst[i][0] == 'ld':
+        if (len(lst[i]) != 3):
+            print("General Syntax Error")
+            break
+        p = 'load'
+        registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[binToDec(int(registerValue(lst[binToDec(int(lst[i][2]))][1])))]
+        ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + lst[i][2])
+
+##########################################
+        aux = []
+        programCounter = programCounter + 1
+        toAdd = bin(programCounter, 8)
+        aux.append(str(toAdd))
+        registerStorage[7] = 0
+        for i in registerStorage:
+            aux.append(bin(i, 16))
+        sim.append(
+            aux[0] + " " + aux[1] + " " + aux[2] + " " + aux[3] + " " + aux[4] + " " + aux[5] + " " + aux[6] + " " +
+            aux[7] + " " + aux[8])
+##########################################
+
     elif lst[i][0] == 'var':
         if (len(lst[i]) != 2):
             print("Wrong syntax used for instructions")
@@ -281,26 +551,19 @@ for i in range(len(lst)):
                 print("Multiple Names for the same Variable")
                 break
             var[lst[i][1]] = 0
-    elif lst[i][0] == 'st':
-        if (len(lst[i]) != 3):
-            print("General Syntax Error")
-            break
-        p = 'store'
-        var[lst[i][2]] = registerStorage[binToDec(int(registerValue(lst[i][1])))]
-        ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(i + 1, 8))
-    elif lst[i][0] == 'ld':
-        if (len(lst[i]) != 3):
-            print("General Syntax Error")
-            break
-        p = 'load'
-        registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[binToDec(int(registerValue(lst[binToDec(int(lst[i][2]))][1])))]
-        ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + lst[i][2])
+
     elif lst[i][0] == 'hlt':
         ans.append(bin(int(return_key('halt')), 5) + "00000000000")
         break
+
+
+
     else:
         print("Typos in instruction name or register name")
         break
 
 for i in ans:
+    print(i)
+
+for i in sim:
     print(i)
