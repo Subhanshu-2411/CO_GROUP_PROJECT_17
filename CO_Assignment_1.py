@@ -90,15 +90,14 @@ The register only supports whole numbers so all operations leading to negative w
 
 programCounter = -1
 
-def Simulator(programCounter):
+def Simulator(programCounter,flag):
     aux = []
     toAdd = bin(programCounter, 8)
     aux.append(str(toAdd))
-    registerStorage[7] = 0
+    registerStorage[7] = flag
     for i in registerStorage:
         aux.append(bin(i, 16))
-    sim.append(
-        aux[0] + " " + aux[1] + " " + aux[2] + " " + aux[3] + " " + aux[4] + " " + aux[5] + " " + aux[6] + " " + aux[7] + " " + aux[8])
+    sim.append(aux[0] + " " + aux[1] + " " + aux[2] + " " + aux[3] + " " + aux[4] + " " + aux[5] + " " + aux[6] + " " + aux[7] + " " + aux[8])
 
 sim = []
 
@@ -130,7 +129,7 @@ for i in range(len(lst)):
                 registerStorage[int(lst[i][1][1])] = int(lst[i][2])
                 ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'add':
         if(len(lst[i]) != 4):
@@ -151,7 +150,7 @@ for i in range(len(lst)):
         else:
             registerStorage[7] = 0
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'sub':
         if (len(lst[i]) != 4):
@@ -172,7 +171,7 @@ for i in range(len(lst)):
         else:
             registerStorage[7] = 0
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'mul':
         if (len(lst[i]) != 4):
@@ -193,7 +192,7 @@ for i in range(len(lst)):
         else:
             registerStorage[7] = 0
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'div':
         # General Syntax Error for any no. != 0
@@ -211,12 +210,8 @@ for i in range(len(lst)):
         registerStorage[1] = binToDec(int(registerValue(lst[i][1]))) % binToDec(int(registerValue(lst[i][2])))
         p = 'divide'
         ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
-
-
-
-
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'rs':
         if (len(lst[i]) != 3):
@@ -231,7 +226,7 @@ for i in range(len(lst)):
         registerStorage[x] = registerStorage[x]>>lst[i][2]
         ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'ls':
         if (len(lst[i]) != 3):
@@ -246,7 +241,7 @@ for i in range(len(lst)):
         registerStorage[x] = registerStorage[x]<<lst[i][2]
         ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'xor':
         if (len(lst[i]) != 4):
@@ -256,7 +251,7 @@ for i in range(len(lst)):
         p = 'exclusiveor'
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'or':
         if (len(lst[i]) != 4):
@@ -266,7 +261,7 @@ for i in range(len(lst)):
         p = 'or'
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'and':
         if (len(lst[i]) != 4):
@@ -276,7 +271,7 @@ for i in range(len(lst)):
         p = 'and'
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'not':
         if (len(lst[i]) != 3):
@@ -284,22 +279,24 @@ for i in range(len(lst)):
             break
         p = 'invert'
         registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = NOT(str(bin(registerStorage[binToDec(int(registerValue(lst[i][2])))])))
-        ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
+        ans.append(bin(int(return_key("")), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'cmp':
+        flag = 0
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
             break
         if registerStorage[binToDec(int(registerValue(lst[i][1])))] > registerStorage[binToDec(int(registerValue(lst[i][2])))]:
-            registerStorage[7] = 2
+            flag = 2
         elif registerStorage[binToDec(int(registerValue(lst[i][1])))] < registerStorage[binToDec(int(registerValue(lst[i][2])))]:
-            registerStorage[7] = 4
+            flag = 4
         elif registerStorage[binToDec(int(registerValue(lst[i][1])))] == registerStorage[binToDec(int(registerValue(lst[i][2])))]:
-            registerStorage[7] = 1
+            flag = 1
+        ans.append(bin(int(return_key('compare')), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,flag)
 
     elif lst[i][0] == 'jmp':
         if (len(lst[i]) != 2):
@@ -310,7 +307,7 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
 
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'jlt':
         if (len(lst[i]) != 2):
@@ -323,7 +320,7 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
 
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'jgt':
         if (len(lst[i]) != 2):
@@ -336,7 +333,7 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
 
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'je':
         if (len(lst[i]) != 2):
@@ -349,7 +346,7 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
 
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'st':
         if (len(lst[i]) != 3):
@@ -360,7 +357,7 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(i + 1, 8))
 
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'ld':
         if (len(lst[i]) != 3):
@@ -371,7 +368,7 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + lst[i][2])
 
         programCounter = programCounter + 1
-        Simulator(programCounter)
+        Simulator(programCounter,0)
 
     elif lst[i][0] == 'var':
         if (len(lst[i]) != 2):

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="81a5c54b-2fe1-4c6a-ad4d-62e33ef7b4f8" name="Changes" comment="">
+    <list default="true" id="81a5c54b-2fe1-4c6a-ad4d-62e33ef7b4f8" name="Changes" comment="MJ 6">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CO_Assignment_1.py" beforeDir="false" afterPath="$PROJECT_DIR$/CO_Assignment_1.py" afterDir="false" />
     </list>
@@ -62,14 +62,37 @@
       <option name="presentableId" value="Default" />
       <updated>1629692006887</updated>
     </task>
+    <task id="LOCAL-00001" summary="MJ 6">
+      <created>1629736485990</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1629736485990</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="MJ 6" />
+    <option name="LAST_COMMIT_MESSAGE" value="MJ 6" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/CO_Assignment_1.py</url>
-          <line>340</line>
+          <line>337</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
