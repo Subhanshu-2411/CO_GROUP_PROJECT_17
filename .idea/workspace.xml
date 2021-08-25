@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="81a5c54b-2fe1-4c6a-ad4d-62e33ef7b4f8" name="Changes" comment="MJ 6">
+    <list default="true" id="81a5c54b-2fe1-4c6a-ad4d-62e33ef7b4f8" name="Changes" comment="Checked the functions upto compare manually for simple execution errors.Please check other functions. The errors in var/label and stuff I will check on Tuesday. Please take care of Memory dump and Bonus question.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CO_Assignment_1.py" beforeDir="false" afterPath="$PROJECT_DIR$/CO_Assignment_1.py" afterDir="false" />
     </list>
@@ -15,6 +15,14 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="ProjectId" id="1x72rhUF0vR0FK4ngYKwEL8Mi7y" />
   <component name="ProjectViewState">
@@ -69,7 +77,14 @@
       <option name="project" value="LOCAL" />
       <updated>1629736485990</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Checked the functions upto compare manually for simple execution errors.Please check other functions. The errors in var/label and stuff I will check on Tuesday. Please take care of Memory dump and Bonus question.">
+      <created>1629737349821</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1629737349821</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -82,23 +97,35 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="MJ 6" />
-    <option name="LAST_COMMIT_MESSAGE" value="MJ 6" />
+    <MESSAGE value="Checked the functions upto compare manually for simple execution errors.Please check other functions. The errors in var/label and stuff I will check on Tuesday. Please take care of Memory dump and Bonus question." />
+    <option name="LAST_COMMIT_MESSAGE" value="Checked the functions upto compare manually for simple execution errors.Please check other functions. The errors in var/label and stuff I will check on Tuesday. Please take care of Memory dump and Bonus question." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/CO_Assignment_1.py</url>
-          <line>337</line>
+          <line>117</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/CO_Assignment_1.py</url>
-          <line>51</line>
+          <line>53</line>
           <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/CO_Assignment_1.py</url>
+          <line>231</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/CO_Assignment_1.py</url>
+          <line>428</line>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

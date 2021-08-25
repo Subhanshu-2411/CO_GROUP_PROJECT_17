@@ -25,6 +25,8 @@ def registerValue(a):
         a = '101'
     elif a == 'R6':
         a = '110'
+    elif a == 'FLAGS':
+        a = '111'
     else:
         pass
 
@@ -44,7 +46,7 @@ functionOpcode = {'0': 'addition',
                   '12': 'and',
                   '13': 'invert',
                   '14': 'compare',
-                  '15': 'unconcditionaljump',
+                  '15': 'unconditionaljump',
                   '16': 'jumpiflessthan',
                   '17': 'jumpifgreaterthan',
                   '18': 'jumpifequal',
@@ -73,7 +75,7 @@ def NOT(x):
             y += "0"
     return int(y)
 var = {}     # variable storage list containing variable name and value of the variable (default as = 0)
-label = {}   # label function not yet implemented
+label = {}   # Contains the value of i in which the keys of labels are implemented.
 def checkName(x):
 
     return x.isalnum()
@@ -86,8 +88,9 @@ registerStorage = [0, 0, 0, 0, 0, 0, 0, 0]
 '''
 The register only supports whole numbers so all operations leading to negative will be set to 0 and overflow will be actiavted.
 
-'''
+Only operation allowed on flags in the mov R1 flags operation all other operations are prohibited.
 
+'''
 programCounter = -1
 
 def Simulator(programCounter,flag):
@@ -102,8 +105,9 @@ def Simulator(programCounter,flag):
 sim = []
 
 while(True):
-    inst = input();
+    inst = input()
     if(inst=="hlt"):
+        lst.append(inst.split(" "))
         break
     elif(inst==" "):
         continue
@@ -111,6 +115,10 @@ while(True):
         lst.append(inst.split(" "))
 
 for i in range(len(lst)):
+    if 'label' in lst[i][0]:
+        label[lst[i][0]] = int(i)
+        lst[i] = lst[i][1:]
+
     if lst[i][0] == 'mov':
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
@@ -132,6 +140,15 @@ for i in range(len(lst)):
         Simulator(programCounter,0)
 
     elif lst[i][0] == 'add':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+                print("Illegal use of FLAGS Register")
+                break
+        if binToDec(int(registerValue(lst[i][2]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break
+        if binToDec(int(registerValue(lst[i][3]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break
         if(len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
             break
@@ -152,7 +169,18 @@ for i in range(len(lst)):
         programCounter = programCounter + 1
         Simulator(programCounter,0)
 
+
+
     elif lst[i][0] == 'sub':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][2]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][3]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
             break
@@ -172,8 +200,16 @@ for i in range(len(lst)):
             registerStorage[7] = 0
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'mul':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][2]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][3]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
             break
@@ -193,10 +229,18 @@ for i in range(len(lst)):
             registerStorage[7] = 0
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'div':
         # General Syntax Error for any no. != 0
         # second register should not be zero, R0 and R1 should not be initialised, quotient in R0 and remainder in R1
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][2]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][3]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
             break
@@ -212,8 +256,10 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'rs':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
             break
@@ -227,8 +273,10 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'ls':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
             break
@@ -242,8 +290,16 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'xor':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][2]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][3]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
             break
@@ -252,8 +308,16 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'or':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][2]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][3]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
             break
@@ -262,8 +326,16 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'and':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][2]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][3]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 4):
             print("Wrong syntax used for instructions")
             break
@@ -272,8 +344,13 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'not':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][2]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
             break
@@ -282,8 +359,13 @@ for i in range(len(lst)):
         ans.append(bin(int(return_key("")), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'cmp':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
+        if binToDec(int(registerValue(lst[i][2]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         flag = 0
         if (len(lst[i]) != 3):
             print("Wrong syntax used for instructions")
@@ -298,16 +380,27 @@ for i in range(len(lst)):
         programCounter = programCounter + 1
         Simulator(programCounter,flag)
 
+
+
+
+
+
     elif lst[i][0] == 'jmp':
         if (len(lst[i]) != 2):
             print("Wrong syntax used for instructions")
             break
+        x = label.get(lst[i][1])
+        #lst[i][1] is the label to which we have to jump to
         p = 'unconditionaljump'
-        i = binToDec(int(lst[i][1]))
-        ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
+        ans.append(bin(int(return_key(p)), 5) + "000" + bin(int(x), 8))
+        function = lst[x][1]
 
         programCounter = programCounter + 1
-        Simulator(programCounter,0)
+        Simulator(programCounter, 0)
+
+
+
+
 
     elif lst[i][0] == 'jlt':
         if (len(lst[i]) != 2):
@@ -321,7 +414,6 @@ for i in range(len(lst)):
 
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'jgt':
         if (len(lst[i]) != 2):
             print("Wrong syntax used for instructions")
@@ -334,7 +426,6 @@ for i in range(len(lst)):
 
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'je':
         if (len(lst[i]) != 2):
             print("Wrong syntax used for instructions")
@@ -348,7 +439,15 @@ for i in range(len(lst)):
         programCounter = programCounter + 1
         Simulator(programCounter,0)
 
+
+
+
+
+
     elif lst[i][0] == 'st':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 3):
             print("General Syntax Error")
             break
@@ -358,8 +457,10 @@ for i in range(len(lst)):
 
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'ld':
+        if binToDec(int(registerValue(lst[i][1]))) == 7:
+            print("Illegal use of FLAGS Register")
+            break;
         if (len(lst[i]) != 3):
             print("General Syntax Error")
             break
@@ -369,30 +470,36 @@ for i in range(len(lst)):
 
         programCounter = programCounter + 1
         Simulator(programCounter,0)
-
     elif lst[i][0] == 'var':
         if (len(lst[i]) != 2):
             print("Wrong syntax used for instructions")
             break
+
+
         if i != 0 and lst[i-1][0] != 'var':
             print("Variables not declared at the beginning")
             break
         if not checkName(lst[i][1]):
+            print(lst[i][1])
             print("Use of undefined variables")
             break
         else:
             if var.values() == lst[i][1]:
+                #var.values() gives all the value in the variable dictionary.
                 print("Multiple Names for the same Variable")
                 break
             var[lst[i][1]] = 0
-
     elif lst[i][0] == 'hlt':
         ans.append(bin(int(return_key('halt')), 5) + "00000000000")
+        programCounter = programCounter + 1
+        Simulator(programCounter, 0)
         break
 
     else:
         print("Typos in instruction name or register name")
         break
+
+
 
 for i in ans:
     print(i)
