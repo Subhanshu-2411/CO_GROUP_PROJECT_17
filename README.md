@@ -1,2 +1,2 @@
 # CO_GROUP_PROJECT_17
-Contributors: Mayank Jha, Subhanshu Bansal, Tanmay Singh
+Contributors: Mayank Jha, Subhanshu Bansal
