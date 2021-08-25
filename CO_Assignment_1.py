@@ -121,7 +121,7 @@ while True:
         lst.append(inst.split(" "))
 
 run = True
-
+count = 0
 for a in range(len(lst)):
     if(lst[a][0] == 'hlt'):
         count += 1
