@@ -27,6 +27,8 @@ def registerValue(a):
         a = '101'
     elif a == 'R6':
         a = '110'
+    elif a == 'FLAGS':
+        a = '111'
     else:
         pass
 
@@ -70,6 +72,33 @@ def binToDec(x):
         x = (x - y) / 10
     return num
 
+def RegisterError(i):
+    print(f"Typos in Register Name                                # line {i}")
+
+def UndefinedVariables(i):
+    print(f"Variable used is not defined                          # line {i}")
+
+def UndefinedLabels(i):
+    print(f"Label used is not defined                             # line {i}")
+
+def FlagError(i):
+    print(f"Illegal use of Flag Register                          # line {i}")
+
+def ImmediateValueError(i):
+    print(f"Illegal Immediate Value                               # line {i}")
+
+def WrongVariableDeclaration(i):
+    print(f"Variable not declared at the begining                 # line {i}")
+
+def MissingHlt(i):
+    print(f"Halt Function Missing                                 # line {i}")
+
+def HltNotLast(i):
+    print(f"Halt Function is not the Last Function                # line {i}")
+
+def SyntaxError(i):
+    print(f"Wrong Syntax used for Instruction                     # line {i}")
+
 def NOT(x):
     y = ""
     for i in x:
@@ -88,7 +117,6 @@ label = {}   # label function not yet implemented
 def checkName(x):
 
     return x.isalnum()
-
 
 flag = []
 x: str
@@ -114,308 +142,339 @@ def Simulator(programCounter,flag):
 sim = []
 
 while True:
-    inst = input();
-    if(inst == " "):
+    inst = input()
+    if(inst == 'hlt'):
+        lst.append(['hlt'])
+        break
+    elif(inst == ""):
         continue
     else:
         lst.append(inst.split(" "))
 
-run = True
 count = 0
-for a in range(len(lst)):
-    if(lst[a][0] == 'hlt'):
+
+a = False
+
+for a in lst:
+    if a[0] == lst[-1][0] == 'hlt':
         count += 1
 
-for a in range(len(lst)):
-    if(lst[a][0] == lst[-1][0] == 'hlt' and count == 1):
-        continue
-    else:
-        print("Halt Action not Implemented at the last or done incorrectly")
-        run = False
+if count == 1:
+    for i in range(len(lst)):
+        if lst[i][0] == 'mov':
+            if len(lst[i]) != 3:
+                SyntaxError(i)
+                break
+            if lst[i][2][0] == 'R':
+                p = 'moveregister'
+                registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[
+                    binToDec(int(registerValue(lst[i][2])))]
+                ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
+            elif lst[i][2] == "FLAGS":
+                p = 'moveregister'
+                registerStorage[binToDec(int(registerValue(lst[i][1])))] = binToDec(flag[-1])
+                ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
+            else:
+                p = 'moveimmediate'
+                if int(lst[i][2][1]) < 0 or int(lst[i][2][1]) > 255:
+                    ImmediateValueError(i)
+                    break
+                if lst[i][2][0] == '$':
+                    lst[i][2] = lst[i][2][1:]
+                    registerStorage[int(lst[i][1][1])] = int(lst[i][2])
+                    ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
 
-for i in range(len(lst)):
-    if lst[i][0] == 'mov' and run == True:
-        if len(lst[i]) != 3:
-            print("Wrong syntax used for instructions")
-            break
-        if lst[i][2][0] == 'R':
-            p = 'moveregister'
-            registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[binToDec(int(registerValue(lst[i][2])))]
+        elif lst[i][0] == 'add':
+            if (len(lst[i]) != 4):
+                SyntaxError(i)
+                break
+            registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[binToDec(int(registerValue(lst[i][2])))] + registerStorage[binToDec(int(registerValue(lst[i][3])))]
+            temp = registerStorage[binToDec(int(registerValue(lst[i][1])))]
+            if (temp >= (2 ** 7) or temp < -(2 ** 7)):
+                ans.append("0000000000001000")
+                break
+            p = 'addition'
+            ans.append(
+                bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
+            if (registerStorage[binToDec(int(registerValue(lst[i][1])))] > 2 ** 16 - 1):
+                # This will set the flag since because of the addition the value stored in the destination
+                # register is now greater than the permissible value of 2^16-1
+                registerStorage[7] = 8
+                registerStorage[binToDec(int(registerValue(lst[i][1])))] = (2 ** 16) - 1
+            else:
+                registerStorage[7] = 0
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'sub':
+            if len(lst[i]) != 4:
+                SyntaxError(i)
+                break
+            registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[
+                                                                           binToDec(int(registerValue(lst[i][2])))] - \
+                                                                       registerStorage[
+                                                                           binToDec(int(registerValue(lst[i][3])))]
+            temp = registerStorage[binToDec(int(registerValue(lst[i][1])))]
+            if (temp >= (2 ** 7) or temp < -(2 ** 7)):
+                ans.append("0000000000001000")
+                break
+            p = 'subtraction'
+            ans.append(
+                bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(
+                    lst[i][3]))
+            if (registerStorage[binToDec(int(registerValue(lst[i][1])))] < 0):
+                # This will set the flag since because of the subtraction the value stored in the destination
+                # register is now negative
+                registerStorage[7] = 8
+                registerStorage[binToDec(int(registerValue(lst[i][1])))] = 0
+            else:
+                registerStorage[7] = 0
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'mul':
+            if (len(lst[i]) != 4):
+                SyntaxError(i)
+                break
+            registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[
+                                                                           binToDec(int(registerValue(lst[i][2])))] * \
+                                                                       registerStorage[
+                                                                           binToDec(int(registerValue(lst[i][3])))]
+            temp = registerStorage[binToDec(int(registerValue(lst[i][1])))]
+            if (temp >= (2 ** 7) or temp < -(2 ** 7)):
+                ans.append("0000000000001000")
+                break
+            p = 'multiply'
+            ans.append(
+                bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(
+                    lst[i][3]))
+            if (registerStorage[binToDec(int(registerValue(lst[i][1])))] > 2 ** 16 - 1):
+                # This will set the flag since because of the multiplication the value stored in the destination
+                # register is now greater than the permissible value of 2^16-1
+                registerStorage[7] = 8
+                registerStorage[binToDec(int(registerValue(lst[i][1])))] = 2 ** 16 - 1
+            else:
+                registerStorage[7] = 0
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'div':
+            # General Syntax Error for any no. != 0
+            # second register should not be zero, R0 and R1 should not be initialised, quotient in R0 and remainder in R1
+            if (len(lst[i]) != 3):
+                SyntaxError(i)
+                break
+            if lst[i][1] == 'R1' or lst[i][1] == 'R0' or lst[i][2] == 'R1' or lst[i][2] == 'R0':
+                RegisterError(i)
+                break
+            elif registerStorage[binToDec(int(registerValue(lst[i][2])))] == 0:
+                print("Zero Division Error")
+                break
+            registerStorage[0] = binToDec(int(registerValue(lst[i][1]))) // binToDec(int(registerValue(lst[i][2])))
+            registerStorage[1] = binToDec(int(registerValue(lst[i][1]))) % binToDec(int(registerValue(lst[i][2])))
+            p = 'divide'
             ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
-        else:
-            p = 'moveimmediate'
-            if int(lst[i][2][1]) < 0 or int(lst[i][2][1]) > 255:
-                print("Illegal Immediate Value")
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'rs':
+            if (len(lst[i]) != 3):
+                SyntaxError(i)
                 break
-            if lst[i][2][0] == '$':
-                lst[i][2] = lst[i][2][1:]
-                registerStorage[int(lst[i][1][1])] = int(lst[i][2])
-                ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'add' and run == True:
-        if(len(lst[i]) != 4):
-            print("Wrong syntax used for instructions")
-            break
-        registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[binToDec(int(registerValue(lst[i][2])))] + registerStorage[binToDec(int(registerValue(lst[i][3])))]
-        temp = registerStorage[binToDec(int(registerValue(lst[i][1])))]
-        if(temp >= (2 ** 7) or temp < -(2 ** 7)):
-            ans.append("0000000000001000" )
-            break
-        p = 'addition'
-        ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
-        if(registerStorage[binToDec(int(registerValue(lst[i][1])))]  > 2**16-1):
-            #This will set the flag since because of the addition the value stored in the destination
-            # register is now greater than the permissible value of 2^16-1
-            registerStorage[7] = 8
-            registerStorage[binToDec(int(registerValue(lst[i][1])))] = 2**16-1
-        else:
-            registerStorage[7] = 0
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'sub' and run == True:
-        if (len(lst[i]) != 4):
-            print("Wrong syntax used for instructions")
-            break
-        registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[binToDec(int(registerValue(lst[i][2])))] - registerStorage[binToDec(int(registerValue(lst[i][3])))]
-        temp = registerStorage[binToDec(int(registerValue(lst[i][1])))]
-        if (temp >= (2 ** 7) or temp < -(2 ** 7)):
-            ans.append("0000000000001000" )
-            break
-        p = 'subtraction'
-        ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
-        if (registerStorage[binToDec(int(registerValue(lst[i][1])))] < 0):
-            # This will set the flag since because of the subtraction the value stored in the destination
-            # register is now negative
-            registerStorage[7] = 8
-            registerStorage[binToDec(int(registerValue(lst[i][1])))] = 0
-        else:
-            registerStorage[7] = 0
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'mul' and run == True:
-        if (len(lst[i]) != 4):
-            print("Wrong syntax used for instructions")
-            break
-        registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[binToDec(int(registerValue(lst[i][2])))] * registerStorage[binToDec(int(registerValue(lst[i][3])))]
-        temp = registerStorage[binToDec(int(registerValue(lst[i][1])))]
-        if (temp >= (2 ** 7) or temp < -(2 ** 7)):
-            ans.append("0000000000001000" )
-            break
-        p = 'multiply'
-        ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
-        if (registerStorage[binToDec(int(registerValue(lst[i][1])))] > 2**16-1):
-            # This will set the flag since because of the multiplication the value stored in the destination
-            # register is now greater than the permissible value of 2^16-1
-            registerStorage[7] = 8
-            registerStorage[binToDec(int(registerValue(lst[i][1])))] = 2**16-1
-        else:
-            registerStorage[7] = 0
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'div' and run == True:
-        # General Syntax Error for any no. != 0
-        # second register should not be zero, R0 and R1 should not be initialised, quotient in R0 and remainder in R1
-        if (len(lst[i]) != 3):
-            print("Wrong syntax used for instructions")
-            break
-        if lst[i][1] == 'R1' or lst[i][1] == 'R0' or lst[i][2] == 'R1' or lst[i][2] == 'R0':
-            print("Wrong syntax used for instructions")
-            break
-        elif registerStorage[binToDec(int(registerValue(lst[i][2])))] == 0:
-            print("Zero Division Error")
-            break
-        registerStorage[0] = binToDec(int(registerValue(lst[i][1]))) // binToDec(int(registerValue(lst[i][2])))
-        registerStorage[1] = binToDec(int(registerValue(lst[i][1]))) % binToDec(int(registerValue(lst[i][2])))
-        p = 'divide'
-        ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'rs' and run == True:
-        if (len(lst[i]) != 3):
-            print("Wrong syntax used for instructions")
-            break
-        p = 'rightshift'
-        lst[i][2] = int(lst[i][2][1:])
-        if lst[i][2] < 0 or lst[i][2] > 255:
-            print("Illegal Immediate Value")
-            break
-        x = binToDec(int(registerValue(lst[i][1])))
-        registerStorage[x] = registerStorage[x]>>lst[i][2]
-        ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'ls' and run == True:
-        if (len(lst[i]) != 3):
-            print("Wrong syntax used for instructions")
-            break
-        p = 'leftshift'
-        lst[i][2] = int(lst[i][2][1:])
-        if lst[i][2] <0 or lst[i][2]>255:
-            print("Illegal Immediate Value")
-            break
-        x = binToDec(int(registerValue(lst[i][1])))
-        registerStorage[x] = registerStorage[x]<<lst[i][2]
-        ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'xor' and run == True:
-        if (len(lst[i]) != 4):
-            print("Wrong syntax used for instructions")
-            break
-        registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = registerStorage[int(binToDec(int(registerValue(lst[i][2]))))] ^ registerStorage[int(binToDec(int(registerValue(lst[i][3]))))]
-        p = 'exclusiveor'
-        ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'or' and run == True:
-        if (len(lst[i]) != 4):
-            print("Wrong syntax used for instructions")
-            break
-        registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = registerStorage[int(binToDec(int(registerValue(lst[i][2]))))] + registerStorage[int(binToDec(int(registerValue(lst[i][3]))))]
-        p = 'or'
-        ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'and' and run == True:
-        if (len(lst[i]) != 4):
-            print("Wrong syntax used for instructions")
-            break
-        registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = registerStorage[int(binToDec(int(registerValue(lst[i][2]))))] & registerStorage[int(binToDec(int(registerValue(lst[i][3]))))]
-        p = 'and'
-        ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'not' and run == True:
-        if (len(lst[i]) != 3):
-            print("Wrong syntax used for instructions")
-            break
-        p = 'invert'
-        registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = NOT(str(bin(registerStorage[binToDec(int(registerValue(lst[i][2])))])))
-        ans.append(bin(int(return_key("")), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'cmp' and run == True:
-        flag = 0
-        if (len(lst[i]) != 3):
-            print("Wrong syntax used for instructions")
-            break
-        if registerStorage[binToDec(int(registerValue(lst[i][1])))] > registerStorage[binToDec(int(registerValue(lst[i][2])))]:
-            flag = 2
-        elif registerStorage[binToDec(int(registerValue(lst[i][1])))] < registerStorage[binToDec(int(registerValue(lst[i][2])))]:
-            flag = 4
-        elif registerStorage[binToDec(int(registerValue(lst[i][1])))] == registerStorage[binToDec(int(registerValue(lst[i][2])))]:
-            flag = 1
-        ans.append(bin(int(return_key('compare')), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
-        programCounter = programCounter + 1
-        Simulator(programCounter,flag)
-
-    elif lst[i][0] == 'jmp' and run == True:
-        if (len(lst[i]) != 2):
-            print("Wrong syntax used for instructions")
-            break
-        p = 'unconditionaljump'
-        i = binToDec(int(lst[i][1]))
-        ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
-
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'jlt' and run == True:
-        if (len(lst[i]) != 2):
-            print("Wrong syntax used for instructions")
-            break
-        p = "jumpiflessthan"
-        for j in flag:
-            if j == "0000000000000100":
-                i = binToDec(int(lst[i][1]))
-        ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
-
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'jgt' and run == True:
-        if (len(lst[i]) != 2):
-            print("Wrong syntax used for instructions")
-            break
-        p = "jumpifgreaterthan"
-        for j in flag:
-            if j == "0000000000000010":
-                i = binToDec(int(lst[i][1]))
-        ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
-
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'je' and run == True:
-        if (len(lst[i]) != 2):
-            print("Wrong syntax used for instructions")
-            break
-        p = 'jumpifequal'
-        for j in flag:
-            if j == "0000000000000001":
-                i = binToDec(int(lst[i][1]))
-        ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
-
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'st' and run == True:
-        if (len(lst[i]) != 3):
-            print("General Syntax Error")
-            break
-        p = 'store'
-        var[lst[i][2]] = registerStorage[binToDec(int(registerValue(lst[i][1])))]
-        ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(i + 1, 8))
-
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'ld' and run == True:
-        if (len(lst[i]) != 3):
-            print("General Syntax Error")
-            break
-        p = 'load'
-        registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[binToDec(int(registerValue(lst[binToDec(int(lst[i][2]))][1])))]
-        ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + lst[i][2])
-
-        programCounter = programCounter + 1
-        Simulator(programCounter,0)
-
-    elif lst[i][0] == 'var' and run == True:
-        if (len(lst[i]) != 2):
-            print("Wrong syntax used for instructions")
-            break
-        if i != 0 and lst[i-1][0] != 'var':
-            print("Variables not declared at the beginning")
-            break
-        if not checkName(lst[i][1]):
-            print("Use of undefined variables")
-            break
-        else:
-            if var.values() == lst[i][1]:
-                print("Multiple Names for the same Variable")
+            p = 'rightshift'
+            lst[i][2] = int(lst[i][2][1:])
+            if lst[i][2] < 0 or lst[i][2] > 255:
+                ImmediateValueError(i)
                 break
-            var[lst[i][1]] = 0
+            x = binToDec(int(registerValue(lst[i][1])))
+            registerStorage[x] = registerStorage[x] >> lst[i][2]
+            ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
 
-    elif lst[i][0] == 'hlt' and run == True:
-        ans.append(bin(int(return_key('halt')), 5) + "00000000000")
-        break
+        elif lst[i][0] == 'ls':
+            if (len(lst[i]) != 3):
+                SyntaxError(i)
+                break
+            p = 'leftshift'
+            lst[i][2] = int(lst[i][2][1:])
+            if lst[i][2] < 0 or lst[i][2] > 255:
+                ImmediateValueError(i)
+                break
+            x = binToDec(int(registerValue(lst[i][1])))
+            registerStorage[x] = registerStorage[x] << lst[i][2]
+            ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
 
-    else:
-        print(f"Typos in instruction name or register name at line {i}")
-        break
+        elif lst[i][0] == 'xor':
+            if (len(lst[i]) != 4):
+                SyntaxError(i)
+                break
+            registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = registerStorage[int(binToDec(
+                int(registerValue(lst[i][2]))))] ^ registerStorage[int(binToDec(int(registerValue(lst[i][3]))))]
+            p = 'exclusiveor'
+            ans.append(
+                bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(
+                    lst[i][3]))
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'or':
+            if (len(lst[i]) != 4):
+                SyntaxError(i)
+                break
+            registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = registerStorage[int(binToDec(
+                int(registerValue(lst[i][2]))))] + registerStorage[int(binToDec(int(registerValue(lst[i][3]))))]
+            p = 'or'
+            ans.append(
+                bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(
+                    lst[i][3]))
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'and':
+            if (len(lst[i]) != 4):
+                SyntaxError(i)
+                break
+            registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = registerStorage[int(binToDec(
+                int(registerValue(lst[i][2]))))] & registerStorage[int(binToDec(int(registerValue(lst[i][3]))))]
+            p = 'and'
+            ans.append(
+                bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(
+                    lst[i][3]))
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'not':
+            if (len(lst[i]) != 3):
+                SyntaxError(i)
+                break
+            p = 'invert'
+            registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = NOT(
+                str(bin(registerStorage[binToDec(int(registerValue(lst[i][2])))])))
+            ans.append(bin(int(return_key("")), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'cmp':
+            flag = 0
+            if (len(lst[i]) != 3):
+                SyntaxError(i)
+                break
+            if registerStorage[binToDec(int(registerValue(lst[i][1])))] > registerStorage[
+                binToDec(int(registerValue(lst[i][2])))]:
+                flag = 2
+            elif registerStorage[binToDec(int(registerValue(lst[i][1])))] < registerStorage[
+                binToDec(int(registerValue(lst[i][2])))]:
+                flag = 4
+            elif registerStorage[binToDec(int(registerValue(lst[i][1])))] == registerStorage[
+                binToDec(int(registerValue(lst[i][2])))]:
+                flag = 1
+            ans.append(
+                bin(int(return_key('compare')), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
+            programCounter = programCounter + 1
+            Simulator(programCounter, flag)
+
+        elif lst[i][0] == 'jmp':
+            if (len(lst[i]) != 2):
+                SyntaxError(i)
+                break
+            p = 'unconditionaljump'
+            i = binToDec(int(lst[i][1]))
+            ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'jlt':
+            if (len(lst[i]) != 2):
+                SyntaxError(i)
+                break
+            p = "jumpiflessthan"
+            for j in flag:
+                if j == "0000000000000100":
+                    i = binToDec(int(lst[i][1]))
+            ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'jgt':
+            if (len(lst[i]) != 2):
+                SyntaxError(i)
+                break
+            p = "jumpifgreaterthan"
+            for j in flag:
+                if j == "0000000000000010":
+                    i = binToDec(int(lst[i][1]))
+            ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
+
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'je':
+            if len(lst[i]) != 2:
+                SyntaxError(i)
+                break
+            p = 'jumpifequal'
+            for j in flag:
+                if j == "0000000000000001":
+                    i = binToDec(int(lst[i][1]))
+            ans.append(bin(int(return_key(p)), 5) + "000" + lst[i][1])
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'st':
+            if (len(lst[i]) != 3):
+                SyntaxError(i)
+                break
+            p = 'store'
+            var[lst[i][2]] = registerStorage[binToDec(int(registerValue(lst[i][1])))]
+            ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(i + 1, 8))
+
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'ld':
+            if (len(lst[i]) != 3):
+                SyntaxError(i)
+                break
+            p = 'load'
+            registerStorage[binToDec(int(registerValue(lst[i][1])))] = registerStorage[
+                binToDec(int(registerValue(lst[binToDec(int(lst[i][2]))][1])))]
+            ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + lst[i][2])
+
+            programCounter = programCounter + 1
+            Simulator(programCounter, 0)
+
+        elif lst[i][0] == 'var' and run == True:
+            if (len(lst[i]) != 2):
+                SyntaxError(i)
+                break
+            if i != 0 and lst[i - 1][0] != 'var':
+                WrongVariableDeclaration(i)
+                break
+            if not checkName(lst[i][1]):
+                UndefinedVariables(i)
+                break
+            else:
+                if var.values() == lst[i][1]:
+                    WrongVariableDeclaration(i)
+                    break
+                var[lst[i][1]] = 0
+
+        elif lst[i][0] == 'hlt':
+            ans.append(bin(int(return_key('halt')), 5) + "00000000000")
+            break
+
+        else:
+            SyntaxError(i)
+            break
+elif count == 0:
+    MissingHlt(len(lst))
+else:
+    HltNotLast(i)
 
 for i in sim:
     print(i)
