@@ -765,7 +765,7 @@ asb_out_file.close()
 ############################################################# MEMORY DUMP
 
 DateTime_Script = dt.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-A = range(len(sim))
+A = range(len(ans))
 B = range(len(ans))
 
 plt.ylabel("Memory Address")
