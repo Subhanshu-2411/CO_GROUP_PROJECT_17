@@ -128,174 +128,258 @@ ans = []
 registerStorage = [0, 0, 0, 0, 0, 0, 0, 0]
 
 programCounter = -1
-
 def function(i, programCounter):
-    if (lst[i][0] == 'add'):
+    if (lst[i][1] == 'add'):
         add(i,programCounter)
-    if(lst[i][0] == 'sub'):
+    if(lst[i][1] == 'sub'):
         sub(i,programCounter)
-    if(lst[i][0] == 'mul'):
+    if(lst[i][1] == 'mul'):
         mul(i,programCounter)
-    if(lst[i][0] == 'div'):
+    if(lst[i][1] == 'div'):
         div(i,programCounter)
-    if(lst[i][0] == 'rs'):
+    if(lst[i][1] == 'rs'):
         rs(i,programCounter)
-    if(lst[i][0] == 'ls'):
+    if(lst[i][1] == 'ls'):
         ls(i,programCounter)
-    if(lst[i][0] == 'sub'):
-        sub(i,programCounter)
-    if(lst[i][0] == 'xor'):
+    if(lst[i][1] == 'mov' and lst[i][3][0] == 'R'):
+        movReg(i,programCounter)
+    if(lst[i][1] == 'mov' and lst[i][3][0]=='$'):
+        movImm(i,programCounter)
+    if(lst[i][1] == 'xor'):
         xor(i,programCounter)
-    if(lst[i][0] == 'or'):
+    if(lst[i][1] == 'or'):
         OR(i,programCounter)
-    if(lst[i][0] == 'and'):
+    if(lst[i][1] == 'and'):
         AND(i,programCounter)
-    if(lst[i][0] == 'not'):
+    if(lst[i][1] == 'not'):
         NOTlabel(i,programCounter)
-    if(lst[i][0] == 'cmp'):
+    if(lst[i][1] == 'cmp'):
         CMP(i,programCounter)
-    if(lst[i][0] == 'load'):
+    if(lst[i][1] == 'ld'):
         load(i,programCounter)
-    if(lst[i][0] == 'store'):
+    if(lst[i][1] == 'st'):
         store(i,programCounter)
-    if(lst[i][0] == 'hlt'):
+    if(lst[i][1] == 'hlt'):
         hlt(i,programCounter)
-    Simulator(programCounter,0)
+    #Simulator(programCounter,0)
+def movReg(i,programCounter):
+    if len(lst[i]) != 3:
+        SyntaxError(i)
+        return
+    if lst[i][2] == "FLAGS":
+        p = 'moveregister'
+        registerStorage[binToDec(int(registerValue(lst[i][2])))] = binToDec(flag[-1])
+        ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][2]) + registerValue(lst[i][3]))
+    else:
+        p = 'moveregister'
+        registerStorage[binToDec(int(registerValue(lst[i][2])))] = registerStorage[binToDec(int(registerValue(lst[i][3])))]
+        ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][2]) + registerValue(lst[i][3]))
+    programCounter = programCounter + 1
+    Simulator(programCounter, 0)
+def movImm(i,programCounter):
+    p = 'moveimmediate'
+    if int(lst[i][2][1]) < 0 or int(lst[i][2][1]) > 255:
+        ImmediateValueError(i)
+        return
+    if lst[i][3][0] == '$':
+        lst[i][3] = lst[i][3][1:]
+        registerStorage[int(lst[i][2][1])] = int(lst[i][3])
+        ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][2]) + bin(int(lst[i][3]), 8))
+    programCounter = programCounter + 1
+    Simulator(programCounter, 0)
 def add(i,programCounter):
-    a = binToDec(int(registerValue(lst[i][1])))
-    b = binToDec(int(registerValue(lst[i][2])))
-    c = binToDec(int(registerValue(lst[i][3])))
+    if (len(lst[i]) != 4):
+        SyntaxError(i)
+    a = binToDec(int(registerValue(lst[i][2])))
+    b = binToDec(int(registerValue(lst[i][3])))
+    c = binToDec(int(registerValue(lst[i][4])))
     registerStorage[a] = registerStorage[b] + registerStorage[c]
     temp = registerStorage[a]
+    if (temp >= (2 ** 7) or temp < -(2 ** 7)):
+        ans.append("0000000000001000")
     p = 'addition'
-    ans.append(bin(int(return_key(p)), 5)+"00"+registerValue(lst[i][1])+registerValue(lst[i][2])+registerValue(lst[i][3]))
+    ans.append(bin(int(return_key(p)), 5)+"00"+registerValue(lst[i][2])+registerValue(lst[i][3])+registerValue(lst[i][4]))
+    flag = 0
     if (registerStorage[a] > 2 ** 16 - 1):
         # This will set the flag since because of the addition the value stored in the destination
         # register is now greater than the permissible value of 2^16-1
         registerStorage[7] = 8
+        flag = 8
         registerStorage[binToDec(int(registerValue(lst[i][1])))] = 2 ** 16 - 1
     else:
         registerStorage[7] = 0
     programCounter = programCounter + 1
-    Simulator(programCounter, 0)
+    Simulator(programCounter, flag)
 def sub(i,programCounter):
-    a = binToDec(int(registerValue(lst[i][1])))
-    b = binToDec(int(registerValue(lst[i][2])))
-    c = binToDec(int(registerValue(lst[i][3])))
+    if len(lst[i]) != 4:
+        SyntaxError(i)
+    a = binToDec(int(registerValue(lst[i][2])))
+    b = binToDec(int(registerValue(lst[i][3])))
+    c = binToDec(int(registerValue(lst[i][4])))
     registerStorage[a] = registerStorage[b] - registerStorage[c]
+    temp = registerStorage[binToDec(int(registerValue(lst[i][2])))]
+    if (temp >= (2 ** 7) or temp < -(2 ** 7)):
+        ans.append("0000000000001000")
     p = 'subtraction'
-    ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
-    if (registerStorage[binToDec(int(registerValue(lst[i][1])))] < 0):
+    flag = 0
+    ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][2]) + registerValue(lst[i][3]) + registerValue(lst[i][4]))
+    if (registerStorage[binToDec(int(registerValue(lst[i][2])))] < 0):
         # This will set the flag since because of the subtraction the value stored in the destination
         # register is now negative
         registerStorage[7] = 8
+        flag = 8
         registerStorage[binToDec(int(registerValue(lst[i][1])))] = 0
     else:
         registerStorage[7] = 0
     programCounter = programCounter + 1
-    Simulator(programCounter, 0)
+    print(programCounter)
+    Simulator(programCounter, flag)
 def mul(i,programCounter):
-    a = binToDec(int(registerValue(lst[i][1])))
-    b = binToDec(int(registerValue(lst[i][2])))
-    c = binToDec(int(registerValue(lst[i][3])))
+    if (len(lst[i]) != 4):
+        SyntaxError(i)
+    a = binToDec(int(registerValue(lst[i][2])))
+    b = binToDec(int(registerValue(lst[i][3])))
+    c = binToDec(int(registerValue(lst[i][4])))
     registerStorage[a] = registerStorage[b] * registerStorage[c]
+    temp = registerStorage[binToDec(int(registerValue(lst[i][2])))]
+    if (temp >= (2 ** 7) or temp < -(2 ** 7)):
+        ans.append("0000000000001000")
     p = 'multiply'
-    ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
-    if (registerStorage[binToDec(int(registerValue(lst[i][1])))] > 2 ** 16 - 1):
+    flag = 0
+    ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][2]) + registerValue(lst[i][3]) + registerValue(lst[i][4]))
+    if (registerStorage[binToDec(int(registerValue(lst[i][2])))] > 2 ** 16 - 1):
         # This will set the flag since because of the multiplication the value stored in the destination
         # register is now greater than the permissible value of 2^16-1
         registerStorage[7] = 8
+        flag = 8
         registerStorage[binToDec(int(registerValue(lst[i][1])))] = 2 ** 16 - 1
     else:
         registerStorage[7] = 0
     programCounter = programCounter + 1
-    Simulator(programCounter, 0)
+    Simulator(programCounter, flag)
 def div(i,programCounter):
-    registerStorage[0] = registerStorage[binToDec(int(registerValue(lst[i][1])))] // registerStorage[binToDec(int(registerValue(lst[i][2])))]
-    registerStorage[1] = registerStorage[binToDec(int(registerValue(lst[i][1])))] % registerStorage[binToDec(int(registerValue(lst[i][2])))]
+    if (len(lst[i]) != 3):
+        SyntaxError(i)
+        return
+    if lst[i][2] == 'R1' or lst[i][2] == 'R0' or lst[i][3] == 'R1' or lst[i][3] == 'R0':
+        RegisterError(i)
+        return
+    elif registerStorage[binToDec(int(registerValue(lst[i][3])))] == 0:
+        print("Zero Division Error")
+        return
+    registerStorage[0] = registerStorage[binToDec(int(registerValue(lst[i][2])))] // registerStorage[binToDec(int(registerValue(lst[i][3])))]
+    registerStorage[1] = registerStorage[binToDec(int(registerValue(lst[i][2])))] % registerStorage[binToDec(int(registerValue(lst[i][3])))]
     p = 'divide'
-    ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
+    ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][2]) + registerValue(lst[i][3]))
     programCounter = programCounter + 1
     Simulator(programCounter, 0)
 def rs(i,programCounter):
+    if (len(lst[i]) != 3):
+        SyntaxError(i)
+        return
+    if lst[i][3] < 0 or lst[i][3] > 255:
+        ImmediateValueError(i)
+        return
     p = 'rightshift'
-    x = binToDec(int(registerValue(lst[i][1])))
-    registerStorage[x] = registerStorage[x] >> lst[i][2]
-    ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
+    x = binToDec(int(registerValue(lst[i][3][1:])))
+    a = binToDec(int(registerValue(lst[i][2])))
+    registerStorage[a] = registerStorage[a] >> x
+    ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][2]) + bin(int(x), 8))
     programCounter = programCounter + 1
     Simulator(programCounter, 0)
 def ls(i,programCounter):
+    if (len(lst[i]) != 3):
+        SyntaxError(i)
+        return
+    if lst[i][3] < 0 or lst[i][3] > 255:
+        ImmediateValueError(i)
+        return
     p = 'leftshift'
-    x = binToDec(int(registerValue(lst[i][1])))
-    registerStorage[x] = registerStorage[x] << lst[i][2]
-    ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(int(lst[i][2]), 8))
+    x = binToDec(int(registerValue(lst[i][3][1:])))
+    a = binToDec(int(registerValue(lst[i][2])))
+    registerStorage[a] = registerStorage[a] << x
+    ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][2]) + bin(int(x), 8))
     programCounter = programCounter + 1
     Simulator(programCounter, 0)
 def xor(i,programCounter):
-    a = binToDec(int(registerValue(lst[i][1])))
-    b = binToDec(int(registerValue(lst[i][2])))
-    c = binToDec(int(registerValue(lst[i][3])))
+    if (len(lst[i]) != 4):
+        SyntaxError(i)
+        return
+    a = binToDec(int(registerValue(lst[i][2])))
+    b = binToDec(int(registerValue(lst[i][3])))
+    c = binToDec(int(registerValue(lst[i][4])))
     registerStorage[a] = registerStorage[b] ^ registerStorage[c]
     p = 'exclusiveor'
-    ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(
-        lst[i][3]))
+    ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][2]) + registerValue(lst[i][3]) + registerValue(lst[i][4]))
     programCounter = programCounter + 1
     Simulator(programCounter, 0)
 def OR(i,programCounter):
-    a = binToDec(int(registerValue(lst[i][1])))
-    b = binToDec(int(registerValue(lst[i][2])))
-    c = binToDec(int(registerValue(lst[i][3])))
+    if (len(lst[i]) != 4):
+        SyntaxError(i)
+        return
+    a = binToDec(int(registerValue(lst[i][2])))
+    b = binToDec(int(registerValue(lst[i][3])))
+    c = binToDec(int(registerValue(lst[i][4])))
     registerStorage[a] = registerStorage[b] + registerStorage[c]
     p = 'or'
-    ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(
-        lst[i][3]))
+    ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][2]) + registerValue(lst[i][3]) + registerValue(lst[i][4]))
     programCounter = programCounter + 1
     Simulator(programCounter, 0)
 def AND(i,programCounter):
-    a = binToDec(int(registerValue(lst[i][1])))
-    b = binToDec(int(registerValue(lst[i][2])))
-    c = binToDec(int(registerValue(lst[i][3])))
+    if (len(lst[i]) != 4):
+        SyntaxError(i)
+        return
+    a = binToDec(int(registerValue(lst[i][2])))
+    b = binToDec(int(registerValue(lst[i][3])))
+    c = binToDec(int(registerValue(lst[i][4])))
     registerStorage[a] = registerStorage[b] & registerStorage[c]
     p = 'and'
-    ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][1]) + registerValue(lst[i][2]) + registerValue(lst[i][3]))
+    ans.append(bin(int(return_key(p)), 5) + "00" + registerValue(lst[i][2]) + registerValue(lst[i][3]) + registerValue(lst[i][4]))
     programCounter = programCounter + 1
     Simulator(programCounter, 0)
 def NOTlabel(i,programCounter):
+    if (len(lst[i]) != 3):
+        SyntaxError(i)
+        return
     p = 'invert'
-    registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = NOT(str(bin(registerStorage[binToDec(int(registerValue(lst[i][2])))])))
-    ans.append(bin(int(return_key("")), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
+    b = bin(~int(registerStorage[binToDec(int(registerValue(lst[i][3])))]),16)
+    registerStorage[int(binToDec(int(registerValue(lst[i][2]))))] = binToDec(int(b))
+    ans.append(bin(int(return_key(p)), 5) + "00000" + registerValue(lst[i][2]) + registerValue(lst[i][3]))
     programCounter = programCounter + 1
     Simulator(programCounter, 0)
 def CMP(i,programCounter):
-    if registerStorage[binToDec(int(registerValue(lst[i][1])))] > registerStorage[
-        binToDec(int(registerValue(lst[i][2])))]:
+    if (len(lst[i]) != 3):
+        SyntaxError(i)
+        return
+    if registerStorage[binToDec(int(registerValue(lst[i][2])))] > registerStorage[
+        binToDec(int(registerValue(lst[i][3])))]:
         flag = 2
-    elif registerStorage[binToDec(int(registerValue(lst[i][1])))] < registerStorage[
-        binToDec(int(registerValue(lst[i][2])))]:
+    elif registerStorage[binToDec(int(registerValue(lst[i][2])))] < registerStorage[
+        binToDec(int(registerValue(lst[i][3])))]:
         flag = 4
-    elif registerStorage[binToDec(int(registerValue(lst[i][1])))] == registerStorage[
-        binToDec(int(registerValue(lst[i][2])))]:
+    elif registerStorage[binToDec(int(registerValue(lst[i][2])))] == registerStorage[
+        binToDec(int(registerValue(lst[i][3])))]:
         flag = 1
-    ans.append(bin(int(return_key('compare')), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
+    ans.append(bin(int(return_key('compare')), 5) + "00000" + registerValue(lst[i][2]) + registerValue(lst[i][3]))
     programCounter = programCounter + 1
     Simulator(programCounter, flag)
 def load(i,programCounter):
     variables = var.keys()
     p = 'load'
-    if (lst[i][2] in variables):
-        registerStorage[binToDec(int(registerValue(lst[i][1])))] = var[lst[i][2]]
+    if (lst[i][3] in variables):
+        registerStorage[binToDec(int(registerValue(lst[i][2])))] = var[lst[i][3]]
     else:
-        print("General syntax error on line number  " + str(i + 1))
-    ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(i + 1, 8))
+        print("General syntax error on line number  " + str(i))
+    ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][2]) + bin(i + 1, 8))
     programCounter = programCounter + 1
     Simulator(programCounter, 0)
 def store(i,programCounter):
     variables = var.keys()
     p = 'store'
-    if (lst[i][2] in variables):
-        var[lst[i][2]] = registerStorage[binToDec(int(registerValue(lst[i][1])))]
+    if (lst[i][3] in variables):
+        var[lst[i][3]] = registerStorage[binToDec(int(registerValue(lst[i][2])))]
     else:
-        print("General syntax error on line number  " + str(i + 1))
+        print("General syntax error on line number  " + str(i ))
     ans.append(bin(int(return_key(p)), 5) + registerValue(lst[i][1]) + bin(i + 1, 8))
     programCounter = programCounter + 1
     Simulator(programCounter, 0)
@@ -304,7 +388,6 @@ def hlt(i,programCounter):
     programCounter = programCounter + 1
     Simulator(programCounter, 0)
     i = len(lst[i])-1
-
 def Simulator(programCounter,flag):
     aux = []
     toAdd = bin(programCounter, 8)
@@ -313,8 +396,6 @@ def Simulator(programCounter,flag):
     for i in registerStorage:
         aux.append(bin(i, 16))
     sim.append(aux[0] + " " + aux[1] + " " + aux[2] + " " + aux[3] + " " + aux[4] + " " + aux[5] + " " + aux[6] + " " + aux[7] + " " + aux[8])
-
-
 def trimmer(x):
     x = x.rstrip()
     x = x.lstrip()
@@ -322,7 +403,6 @@ def trimmer(x):
         x = x.replace("  "," ")
     return x
 sim = []
-
 while True:
     inst = input()
     if(inst == 'hlt'):
@@ -333,23 +413,30 @@ while True:
     else:
         x = trimmer(inst)
         y = trimmer(x)
-        lst.append(y.split(" "))
-
+        instruction = y.split(" ")
+        lst.append(instruction)
 count = 0
-
 a = False
-
 for a in lst:
     if a[0] == lst[-1][0] == 'hlt':
         count += 1
-
 if count == 1:
     global i
+    labelCounter = 0
     for i in range(len(lst)):
         if 'label' in lst[i][0]:
             key = lst[i][0][:len(lst[i][0]) - 1]
             label[key] = int(i)
+    Execlabel = [False]*len(lst)
+    #Execlabel list will be of size length of list and will contain the boolean
+    # condition of whether the label at some instruction number has been executed or not.
+    for i in range(len(lst)):
+        if 'label' in lst[i][0]:
+            #key = lst[i][0][:len(lst[i][0]) - 1]
+            #label[key] = int(i)
             lst[i] = lst[i][1:]
+            if(Execlabel[i]==True):
+                continue
         if lst[i][0] == 'mov':
             if len(lst[i]) != 3:
                 SyntaxError(i)
@@ -532,8 +619,8 @@ if count == 1:
                 SyntaxError(i)
                 break
             p = 'invert'
-            registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = NOT(
-                str(bin(registerStorage[binToDec(int(registerValue(lst[i][2])))])))
+            b = bin(~int(registerStorage[binToDec(int(registerValue(lst[i][2])))]), 16)
+            registerStorage[int(binToDec(int(registerValue(lst[i][1]))))] = binToDec(int(b))
             ans.append(bin(int(return_key("")), 5) + "00000" + registerValue(lst[i][1]) + registerValue(lst[i][2]))
             programCounter = programCounter + 1
             Simulator(programCounter, 0)
@@ -562,11 +649,12 @@ if count == 1:
             x = label[lst[i][1]]
             # lst[i][1] is the label to which we have to jump to
             p = 'unconditionaljump'
-            #i = binToDec(int(lst[i][1]))
             ans.append(bin(int(return_key(p)), 5) + "000" + bin(int(x), 8))
             programCounter = programCounter + 1
             Simulator(programCounter, 0)
+            Execlabel[x] = True
             function(x, programCounter)
+            programCounter = programCounter + 1
         elif lst[i][0] == 'jlt':
             if (len(lst[i]) != 2):
                 SyntaxError(i)
@@ -576,9 +664,11 @@ if count == 1:
             ans.append(bin(int(return_key(p)), 5) + "000" + bin(int(x),8))
             programCounter = programCounter + 1
             Simulator(programCounter, 0)
+            Execlabel[x] = True
             if(flag==4):
                 x = label[lst[i][1]]
                 function(x, programCounter)
+                programCounter = programCounter + 1
         elif lst[i][0] == 'jgt':
             if (len(lst[i]) != 2):
                 SyntaxError(i)
@@ -588,8 +678,10 @@ if count == 1:
             ans.append(bin(int(return_key(p)), 5) + "000" + bin(int(x),8))
             programCounter = programCounter + 1
             Simulator(programCounter, 0)
+            Execlabel[x] = True
             if(flag==2):
                 function(x, programCounter)
+                programCounter = programCounter + 1
         elif lst[i][0] == 'je':
             if len(lst[i]) != 2:
                 SyntaxError(i)
@@ -599,8 +691,10 @@ if count == 1:
             ans.append(bin(int(return_key(p)), 5) + "000" + bin(int(x),8))
             programCounter = programCounter + 1
             Simulator(programCounter, 0)
+            Execlabel[x] = True
             if(flag==1):
                 function(x, programCounter)
+                programCounter = programCounter + 1
         elif lst[i][0] == 'st':
             if binToDec(int(registerValue(lst[i][1]))) == 7:
                 FlagError(i)
@@ -656,6 +750,7 @@ if count == 1:
         else:
             SyntaxError(i)
             break
+
 elif count == 0:
     MissingHlt(len(lst))
 else:
