@@ -1,8 +1,7 @@
 import sys
 import json
 import datetime as dt
-
-
+import matplotlib.pyplot as plt
 def bin(value, noOfDigits = 16):  # returns the binary value of the number
 
     i = 1 << noOfDigits - 1  # Also takes the no of digit to be displayed for representation and default is 32
@@ -14,7 +13,6 @@ def bin(value, noOfDigits = 16):  # returns the binary value of the number
             x += "0"
         i = i // 2
     return x
-
 def registerValue(a):
     if a == 'R0':
         a = '000'
@@ -36,7 +34,6 @@ def registerValue(a):
         pass
 
     return a
-
 functionOpcode = {'0': 'addition',
                   '1': 'subtraction',
                   '2': 'moveimmediate',
@@ -52,18 +49,16 @@ functionOpcode = {'0': 'addition',
                   '12': 'and',
                   '13': 'invert',
                   '14': 'compare',
-                  '15': 'unconcditionaljump',
+                  '15': 'unconditionaljump',
                   '16': 'jumpiflessthan',
                   '17': 'jumpifgreaterthan',
                   '18': 'jumpifequal',
                   '19': 'halt'}
-
 def return_key(val):
     for key, value in functionOpcode.items():
         if value == val:
             return key
     return -1
-
 def binToDec(x):
     num = 0
     i = 0
@@ -74,34 +69,24 @@ def binToDec(x):
         i = i + 1
         x = (x - y) / 10
     return num
-
 def RegisterError(i):
     print(f"Typos in Register Name                                # line {i}")
-
 def UndefinedVariables(i):
     print(f"Variable used is not defined                          # line {i}")
-
 def UndefinedLabels(i):
     print(f"Label used is not defined                             # line {i}")
-
 def FlagError(i):
     print(f"Illegal use of Flag Register                          # line {i}")
-
 def ImmediateValueError(i):
     print(f"Illegal Immediate Value                               # line {i}")
-
 def WrongVariableDeclaration(i):
     print(f"Variable not declared at the begining                 # line {i}")
-
 def MissingHlt(i):
     print(f"Halt Function Missing                                 # line {i}")
-
 def HltNotLast(i):
     print(f"Halt Function is not the Last Function                # line {i}")
-
 def SyntaxError(i):
     print(f"Wrong Syntax used for Instruction                     # line {i}")
-
 def NOT(x):
     y = ""
     for i in x:
@@ -110,23 +95,15 @@ def NOT(x):
         elif i == "1":
             y += "0"
     return int(y)
-
 var = {}     # variable storage list containing variable name and value of the variable (default as = 0)
-
-
 label = {}   # label function not yet implemented
-
-
 def checkName(x):
-
     return x.isalnum()
-
 flag = []
 x: str
 lst = []
 ans = []
 registerStorage = [0, 0, 0, 0, 0, 0, 0, 0]
-
 programCounter = -1
 def function(i, programCounter):
     if (lst[i][1] == 'add'):
@@ -773,16 +750,25 @@ for i in range(len(ans)):
 
 DateTime_Script = dt.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
-sim_out_file = open(f"C:\\Users\\subha\\OneDrive\\Desktop\\CO_Assignment_MEMORY_DUMP\\simulator\\{DateTime_Script} data.json", "w")
+sim_out_file = open(f"~/Desktop/CO_Assignment_MEMORY_DUMP/simulator/{DateTime_Script} data.json", "w")
 
 json.dump(sim_memory, sim_out_file)
 
 sim_out_file.close()
 
-asb_out_file = open(f"C:\\Users\\subha\\OneDrive\\Desktop\\CO_Assignment_MEMORY_DUMP\\assembler\\{DateTime_Script} data.json", "w")
+asb_out_file = open(f"~/Desktop/CO_Assignment_MEMORY_DUMP/assembler/{DateTime_Script} data.json", "w")
 
 json.dump(asb_memory, asb_out_file)
 
 asb_out_file.close()
 
 ############################################################# MEMORY DUMP
+
+A = range(len(lst))
+B = range(len(lst))
+
+plt.ylabel("Memory Address")
+plt.xlabel("No. Of Cycles")
+plt.scatter(A, B)
+plt.show()
+plt.savefig(f"C:\\Users\\subha\\OneDrive\\Desktop\\CO_Assignment_MEMORY_DUMP\\plots\\IMG_{DateTime_Script}_plot.PNG", dpi = 600)
