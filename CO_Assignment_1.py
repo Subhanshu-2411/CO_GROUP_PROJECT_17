@@ -1,5 +1,7 @@
-
 import sys
+import json
+import datetime as dt
+
 
 def bin(value, noOfDigits = 16):  # returns the binary value of the number
 
@@ -664,3 +666,28 @@ for i in sim:
 
 for i in ans:
     print(i)
+
+############################################################     MEMORY DUMP
+sim_memory = {}
+asb_memory = {}
+
+for i in range(len(sim)):
+    sim_memory[i] = sim[i]
+for i in range(len(ans)):
+    asb_memory[i] = ans[i]
+
+DateTime_Script = dt.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+
+sim_out_file = open(f"C:\\Users\\subha\\OneDrive\\Desktop\\CO_Assignment_MEMORY_DUMP\\simulator\\{DateTime_Script} data.json", "w")
+
+json.dump(sim_memory, sim_out_file)
+
+sim_out_file.close()
+
+asb_out_file = open(f"C:\\Users\\subha\\OneDrive\\Desktop\\CO_Assignment_MEMORY_DUMP\\assembler\\{DateTime_Script} data.json", "w")
+
+json.dump(asb_memory, asb_out_file)
+
+asb_out_file.close()
+
+############################################################# MEMORY DUMP
