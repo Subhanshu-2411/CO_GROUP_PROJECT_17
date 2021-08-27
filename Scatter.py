@@ -765,8 +765,8 @@ asb_out_file.close()
 ############################################################# MEMORY DUMP
 
 DateTime_Script = dt.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-A = range(len(lst))
-B = range(len(lst))
+A = range(len(sim))
+B = range(len(ans))
 
 plt.ylabel("Memory Address")
 plt.xlabel("No. Of Cycles")
